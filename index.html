@@ -1189,7 +1189,7 @@ const catOf=e=>e.cad==='única'?'pontual':(e.ate?'temp':'fixa');
 function renderAll(){
   renderNav();
   CF=conflicts();
-  document.getElementById('cfn').textContent=CF.filter(c=>c.lvl==='conflito').length?'· '+CF.filter(c=>c.lvl==='conflito').length:'';
+  const cfnEl=document.getElementById('cfn');if(cfnEl)cfnEl.textContent=CF.filter(c=>c.lvl==='conflito').length?'· '+CF.filter(c=>c.lvl==='conflito').length:'';
   document.getElementById('ver').textContent=S.version||'cenário 1';
   document.body.classList.toggle('bycolor',S.colorMode==='area');
   document.querySelectorAll('.alegend').forEach(el=>el.innerHTML=areaLegend());renderVerticals();
