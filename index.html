@@ -1644,13 +1644,13 @@ function openEvent(id,occ){
 }
 function openPerson(id){
   const p=P(id);if(!p)return;
-  const evs=S.events.filter(e=>e.p.includes(id)).sort((a,b)=>Math.min(...a.d)-Math.min(...b.d)||m(a.a)-m(b.a));
+  const evs=S.events.filter(e=>e.p.includes(id)&&isMeet(e)).sort((a,b)=>Math.min(...a.d)-Math.min(...b.d)||m(a.a)-m(b.a));
   const {fin,sal}=loadOf(id);const cfs=CF.filter(c=>c.pid===id);
   const subs=S.people.filter(x=>x.reporta===id);
   openDrawer('Pessoa · '+vertOf(p.area).nome+(vertOf(p.area).tempero?' ('+vertOf(p.area).tempero+')':'')+' › '+p.area,`<h4>${esc(p.nome)}</h4><div class="sub">${esc(p.cargo)} · ${esc(vertOf(p.area).nome)} › ${esc(p.area)}${p.entra?' · entra '+esc(p.entra):''}</div>
   <div class="kv"><b>Sala</b><span>${esc(p.sala)||'—'}</span><b>Reporta a</b><span>${p.reporta&&P(p.reporta)?chip(P(p.reporta).nome,`openPerson('${p.reporta}')`):'—'}</span>${subs.length?`<b>Lidera</b><span>${subs.map(x=>chip(x.nome,`openPerson('${x.id}')`)).join('')}</span>`:''}<b>Reunião</b><span>${fmtH(fin+sal)} / semana (financeiro ${fmtH(fin)} · sal ${fmtH(sal)})</span><b>Obs.</b><span>${esc(p.obs)||'—'}</span></div>
   <h5>Horário</h5><table>${[1,2,3,4,5].map(d=>{const h=hoursOf(p,d);return `<tr><td class="hh">${D3[d-1]}</td><td>${h?(h.k==='flex'?'flexível até '+hm(h.e):hm(h.s)+'–'+hm(h.e)+(h.ls!=null?' · almoço '+hm(h.ls)+'–'+hm(h.le):'')+(h.k==='loja'?' · loja':'')):'folga'}</td></tr>`}).join('')}</table>
-  <h5>Agenda completa <small style="font-weight:400;color:var(--muted)">fixas, com prazo e pontuais</small></h5>${evLines(evs)}
+  <h5>Agenda completa <small style="font-weight:400;color:var(--muted)">só reuniões · fixas, com prazo e pontuais</small></h5>${evLines(evs)}
   ${cfs.length?`<h5>Conflitos</h5>${cfs.map(c=>`<div class="cf ${c.lvl==='aviso'?'warn':''}" style="margin-bottom:6px"><span class="lvl">${c.lvl}</span><div><div class="t" style="font-size:13px">${esc(c.t)}</div><div class="s">${esc(c.s)} — <a onclick="openEvent('${c.ev}')">abrir</a></div></div></div>`).join('')}`:''}
   <div class="acts"><button class="btn sm" onclick="FILTER='${id}';renderChips();applyFilter();show('semana');closeDrawer()">Ver na semana</button><button class="btn sm" onclick="FILTER='${id}';renderChips();applyFilter();show('calendario');closeDrawer()">Ver no calendário</button><button class="btn sm" onclick="show('pessoas');closeDrawer();setTimeout(()=>document.getElementById('area-${id}')?.scrollIntoView({behavior:'smooth',block:'start'}),50)">Ver faixa</button><button class="btn sm" onclick="editPerson('${id}')">Editar</button></div>`,p.area);
 }
