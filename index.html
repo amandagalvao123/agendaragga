@@ -153,6 +153,8 @@ label.f{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercas
 .ev.hi{outline:3px solid var(--blue-900);outline-offset:-1px;z-index:3}
 .ev.warn{outline:3px dashed #E5322D;outline-offset:-2px}.ev.warn::after{content:"!";position:absolute;top:2px;right:5px;font-weight:700;font-size:12px;background:#E5322D;color:#fff;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px}
 .cfb{display:inline-block;margin-left:6px;background:#E5322D;color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;cursor:pointer;vertical-align:2px}
+.bgb{display:block;margin:4px 0 0;background:rgba(255,255,255,.22);color:inherit;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bgb:hover{background:rgba(255,255,255,.38)}
 .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:14px;height:14px;display:inline-block;border-left:3px solid var(--blue)}
@@ -1306,12 +1308,12 @@ function renderGrid(elId,mode){
   if(mode==='real'){occs=occsBetween(dates[0],dates[4]).map(o=>({...o,day:pd(o.date).getDay()}));WCF=weekConflicts(occs)}
   else{occs=[];S.events.filter(e=>e.cad!=='única').forEach(e=>e.d.forEach(d=>occs.push({e,day:d,a:e.a,b:e.b,orig:null,date:null,ov:false})))}
   GRIDS[mode]=occs;
-  let h='<div class="wh">&nbsp;</div>'+DAYS.map((d,i)=>{const k=dates[i]&&isoD(dates[i]);const hol=k&&HOLI[k];const today=k&&k===isoD(new Date());const nc=mode==='template'?CF.filter(c=>c.lvl==='conflito'&&c.d===i+1&&(FILTER==='all'||c.pid===FILTER)).length:(k?WCF.filter(c=>c.type==='overlap'&&(GRIDS.real&&GRIDS.real[c.i]&&GRIDS.real[c.i].date===k)).length:0);return `<div class="wh ${hol?'hol':''} ${today?'today':''}">${d}${k?` <span class="dn">${dates[i].getDate()}</span>`:''}${nc?`<span class="cfb" onclick="show('conflitos')" title="conflitos neste dia">${nc} conflito${nc>1?'s':''}</span>`:''}<small>${hol?'Feriado · '+hol:sub[i]}</small></div>`}).join('');
+  let h='<div class="wh">&nbsp;</div>'+DAYS.map((d,i)=>{const k=dates[i]&&isoD(dates[i]);const hol=k&&HOLI[k];const today=k&&k===isoD(new Date());const nc=mode==='template'?CF.filter(c=>c.lvl==='conflito'&&c.d===i+1&&(FILTER==='all'||c.pid===FILTER)).length:(k?WCF.filter(c=>c.type==='overlap'&&(GRIDS.real&&GRIDS.real[c.i]&&GRIDS.real[c.i].date===k)).length:0);const bands=occs.filter(o=>o.day===i+1&&o.e.bg);return `<div class="wh ${hol?'hol':''} ${today?'today':''}">${d}${k?` <span class="dn">${dates[i].getDate()}</span>`:''}${nc?`<span class="cfb" onclick="show('conflitos')" title="conflitos neste dia">${nc} conflito${nc>1?'s':''}</span>`:''}${bands.map(o=>`<span class="bgb" onclick="openEvent('${o.e.id}')" title="Editar ${esc(o.e.t)}">${esc(o.e.t)}</span>`).join('')}<small>${hol?'Feriado · '+hol:sub[i]}</small></div>`}).join('');
   h+=`<div class="times" style="height:${H}px">`;for(let t=T0;t<=T1;t+=60)h+=`<div style="top:${y(t)}px;${t===T0?'transform:translateY(3px)':''}">${String(t/60|0).padStart(2,'0')}h</div>`;h+='</div>';
   for(let d=1;d<=5;d++){
     const k=dates[d-1]&&isoD(dates[d-1]);const hol=k&&HOLI[k];
     h+=`<div class="day ${hol?'hol':''}" data-day="${d}" data-date="${k||''}" style="height:${H}px">`;
-    occs.forEach((o,i)=>{if(o.day!==d||!o.e.bg)return;const e=o.e;h+=`<div class="band" data-p="${e.p.join(' ')}" data-i="${i}" style="${cvars(areaOf(e))}top:${y(m(o.a))}px;height:${y(m(o.b))-y(m(o.a))}px"><span>${esc(e.t)} · ${e.p.map(x=>P(x)?P(x).nome.split(' ')[0]:'').join(' + ')}</span></div>`});
+    occs.forEach((o,i)=>{if(o.day!==d||!o.e.bg)return;const e=o.e;h+=`<div class="band" data-p="${e.p.join(' ')}" data-ev="${e.id}" data-i="${i}" style="${cvars(areaOf(e))}top:${y(m(o.a))}px;height:${y(m(o.b))-y(m(o.a))}px;cursor:pointer" onclick="openEvent('${e.id}')"><span>${esc(e.t)} · ${e.p.map(x=>P(x)?P(x).nome.split(' ')[0]:'').join(' + ')}</span></div>`});
     const flexP=S.people.filter(p=>p.h[d]&&p.h[d][4]==='flex'&&m(p.h[d][1])>18*60);const flexEnd=Math.max(0,...flexP.map(p=>m(p.h[d][1])));
     if(flexEnd>18*60)h+=`<div class="avail" data-p="${flexP.map(p=>p.id).join(' ')}" style="top:${y(18*60)}px;height:${y(flexEnd)-y(18*60)}px">Flexível até ${hm(flexEnd)}</div>`;
     const vis=occs.map((o,i)=>({o,i})).filter(x=>x.o.day===d&&!x.o.e.bg&&(isMeet(x.o.e)||(SHOWROT&&true)||x.o.e.cad==='única'));
@@ -1389,10 +1391,11 @@ function wireGrid(w,mode){
   const snap=v=>Math.round(v/15)*15;
   let drag=null;
   w.addEventListener('pointerdown',ev=>{
-    const el=ev.target.closest('.ev');const dayEl=ev.target.closest('.day');
+    const el=ev.target.closest('.ev');const bandEl=ev.target.closest('.band');const dayEl=ev.target.closest('.day');
     if(ev.button!==0&&ev.pointerType==='mouse')return;
     if(el){const o=GRIDS[mode][+el.dataset.i];const rz=ev.target.classList.contains('rz');
       drag={el,o,rz,x0:ev.clientX,y0:ev.clientY,moved:false,day0:o.day,s0:m(o.a),e0:m(o.b)};el.setPointerCapture(ev.pointerId);ev.preventDefault();}
+    else if(bandEl){ev.stopPropagation()}
     else if(dayEl){drag={dayEl,x0:ev.clientX,y0:ev.clientY,moved:false,empty:true}}
   });
   w.addEventListener('pointermove',ev=>{
